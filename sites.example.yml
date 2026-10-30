@@ -1,0 +1,33 @@
+# cp sites.example.yml sites.yml して編集する (sites.yml は git 管理外)
+# 変更後は make reload で反映される
+#
+# <ランタイム>:            static / php<バージョン> / node<バージョン> (例: php8.3, php7.3, node24)
+#                         書いたバージョンのコンテナが自動で用意される
+#   <ルートのパス>:        php / static はドキュメントルート、node はプロジェクトルート
+#     domains:            ドメインの一覧 (コンテナ内の DNS にも自動で登録される)
+#     start:              [node のみ] 起動コマンド (ポートは自動で割り当てられ、環境変数 PORT で渡される)
+#     index:              [static のみ] インデックスファイル (任意、既定値 index.html)
+#     env:                サイトに渡す環境変数 (任意、${VAR} で .env の値を参照できる)
+#     force_https:        true にすると http を https にリダイレクトする (任意)
+#     disabled:           true にすると無効化する (任意)
+#     nginx:              server ブロックに追加する nginx の設定 (任意)
+#
+# 同じルートを複数の設定で使う場合はリストで書く
+#   /project/example:
+#     - domains: [a.local]
+#       env: { APPLICATION_ENV: develop }
+#     - domains: [b.local]
+#       env: { APPLICATION_ENV: local }
+
+php8.2:
+  /project/example/public:
+    domains: [example.local]
+
+node20:
+  /project/example-node:
+    domains: [example-node.local]
+    start: npm run dev
+
+static:
+  /project/example/docs:
+    domains: [example-docs.local]

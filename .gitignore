@@ -1,1 +1,5 @@
 docker-compose.local.yml
+.env
+.DS_Store
+sites.yml
+generated/

@@ -1,6 +1,0 @@
-server {
-    server_name     nginx;
-    root            {DOCUMENT_ROOT};
-
-    include         /etc/nginx/php7.conf;
-}

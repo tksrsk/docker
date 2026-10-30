@@ -1,25 +1,56 @@
 services:
   nginx:
     image: nginx:alpine
+    #  links: ['mysql', 'sqlserver', 'redis', 'dbms', 'docker', 'php5', 'php7', 'php8.0', 'php8.2', 'node18']
     networks:
       default:
-        aliases:
-          - example.local
+        ipv4_address: 172.18.128.10
     ports:
       - 80:80
       - 443:443
+    depends_on:
+      sites:
+        condition: service_completed_successfully
     volumes:
       - project:/project
-      - ./nginx/servers:/etc/nginx/conf.d
-      - ./nginx/base.conf:/etc/nginx/base.conf
-      - ./nginx/server.conf:/etc/nginx/server.conf
-      - ./nginx/php5.conf:/etc/nginx/php5.conf
-      - ./nginx/php7.conf:/etc/nginx/php7.conf
-      - ./nginx/php8.0.conf:/etc/nginx/php8.0.conf
-      - ./nginx/php8.2.conf:/etc/nginx/php8.2.conf
-      - ./nginx/node18.conf:/etc/nginx/node18.conf
+      - ./generated/nginx:/etc/nginx/conf.d
+      - ./nginx/snippets:/etc/nginx/snippets
       - ./nginx/server.key:/etc/ssl/server.key
       - ./nginx/server.crt:/etc/ssl/server.crt
+
+  dns:
+    build: ./dns
+    image: local-dns
+    depends_on:
+      sites:
+        condition: service_completed_successfully
+    volumes:
+      - ./dns/dnsmasq.conf:/etc/dnsmasq.conf
+      - ./generated:/generated:ro
+    networks:
+      default:
+        ipv4_address: 172.18.128.53
+
+  sites:
+    build: ./sites
+    image: local-sites
+    env_file:
+      - path: .env
+        required: false
+    environment:
+      - NGINX_IP=172.18.128.10
+      - DNS_IP=172.18.128.53
+    volumes:
+      - ./sites/generate.js:/app/generate.js:ro
+      - ./:/work:ro
+      - ./generated:/generated
+
+networks:
+  default:
+    ipam:
+      config:
+        - subnet: 172.18.0.0/16
+          ip_range: 172.18.0.0/17   # 自動割り当て用。172.18.128.0/17 は固定 IP 用
 
 volumes:
   project:

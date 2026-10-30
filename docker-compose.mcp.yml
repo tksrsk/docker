@@ -8,6 +8,7 @@ services:
       - project:/project
       - $HOME:$HOME
       - $HOME/.config/develop/resources:/resources
+      - $HOME/.aws:/root/.aws
     environment:
       - ADMIN_PASSWORD=admin
       - SPEC_WORKFLOW_BIND_ADDRESS=0.0.0.0
